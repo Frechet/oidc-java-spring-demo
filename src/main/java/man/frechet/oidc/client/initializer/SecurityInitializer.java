@@ -1,4 +1,4 @@
-package man.frechet.oidc.client;
+package man.frechet.oidc.client.initializer;
 
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 

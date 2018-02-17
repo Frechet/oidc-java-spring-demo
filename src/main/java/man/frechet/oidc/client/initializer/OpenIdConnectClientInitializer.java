@@ -1,4 +1,4 @@
-package man.frechet.oidc.client;
+package man.frechet.oidc.client.initializer;
 
 import man.frechet.oidc.client.config.OpenIdConnectClientConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;

@@ -2,7 +2,6 @@ package man.frechet.oidc.client.config;
 
 import lombok.extern.slf4j.Slf4j;
 import man.frechet.oidc.client.config.openid.OpenIdConnectFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,6 +13,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.filter.RequestContextFilter;
 
 @Slf4j
 @EnableWebSecurity(debug = true)
@@ -24,13 +24,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final String LOGOUT_URL = "/logout";
     private final String AUTHENTICATED_URL = "/user";
 
-    @Autowired
-    public SecurityConfig() {
-    }
-
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return new LoginUrlAuthenticationEntryPoint(LOGIN_URL);
+    }
+
+    @Bean
+    public RequestContextFilter requestContextFilter() {
+        return new RequestContextFilter();
     }
 
     @Bean
@@ -57,6 +58,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         log.debug("Spring Security configure...");
         http
+                // Spring is able to autowire Request/Session scoped beans into filter's
+                // that are outside of the DispatcherServlet As per Spring's documentation,
+                // we need to add the RequestContextListener or RequestContextFilter to enable this functionality.
+                .addFilterBefore(requestContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .addFilterAfter(oAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
                 .addFilterAfter(openIdConnectFilter(), OAuth2ClientContextFilter.class)
                 .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())
